@@ -444,7 +444,7 @@ uint32_t ZLIB_INTERNAL armv8_crc32_little(
     return ~c;
 }
 
-#if defined(__aarch64__) || defined(ARMV8_OS_MACOS) /* aarch64 specific code. */
+#if defined(__aarch64__) || defined(ARMV8_OS_MACOS) || defined(ARMV8_OS_SWITCH) /* aarch64 specific code. */
 
 /*
  * crc32_pmull_simd_(): compute the crc32 of the buffer, where the buffer

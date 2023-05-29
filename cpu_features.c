@@ -17,7 +17,7 @@
 
 /* TODO(cavalcantii): remove checks for x86_flags on deflate.
  */
-#if defined(ARMV8_OS_MACOS)
+#if defined(ARMV8_OS_MACOS) || defined(ARMV8_OS_SWITCH)
 /* Crypto extensions (crc32/pmull) are a baseline feature in ARMv8.1-A, and
  * OSX running on arm64 is new enough that these can be assumed without
  * runtime detection.
@@ -56,21 +56,21 @@ int ZLIB_INTERNAL x86_cpu_enable_avx512 = 0;
 #error cpu_features.c CPU feature detection in not defined for your platform
 #endif
 
-#if !defined(CPU_NO_SIMD) && !defined(ARMV8_OS_MACOS) && !defined(ARM_OS_IOS)
+#if !defined(CPU_NO_SIMD) && !defined(ARMV8_OS_MACOS) && !defined(ARM_OS_IOS) && !defined(ARMV8_OS_SWITCH) 
 static void _cpu_check_features(void);
 #endif
 
-#if defined(ARMV8_OS_ANDROID) || defined(ARMV8_OS_LINUX) || defined(ARMV8_OS_MACOS) || defined(ARMV8_OS_FUCHSIA) || defined(X86_NOT_WINDOWS)
-#if !defined(ARMV8_OS_MACOS)
-// _cpu_check_features() doesn't need to do anything on mac/arm since all
+#if defined(ARMV8_OS_ANDROID) || defined(ARMV8_OS_LINUX) || defined(ARMV8_OS_MACOS) || defined(ARMV8_OS_FUCHSIA) || defined(ARMV8_OS_SWITCH) || defined(X86_NOT_WINDOWS)
+#if !defined(ARMV8_OS_MACOS) && !defined(ARMV8_OS_SWITCH)
+// _cpu_check_features() doesn't need to do anything on mac/arm or switch since all
 // features are known at build time, so don't call it.
 // Do provide cpu_check_features() (with a no-op implementation) so that we
-// don't have to make all callers of it check for mac/arm.
+// don't have to make all callers of it check for mac/arm or switch.
 static pthread_once_t cpu_check_inited_once = PTHREAD_ONCE_INIT;
 #endif
 void ZLIB_INTERNAL cpu_check_features(void)
 {
-#if !defined(ARMV8_OS_MACOS)
+#if !defined(ARMV8_OS_MACOS) && !defined(ARMV8_OS_SWITCH)
     pthread_once(&cpu_check_inited_once, _cpu_check_features);
 #endif
 }
@@ -93,7 +93,7 @@ void ZLIB_INTERNAL cpu_check_features(void)
  * iOS@ARM is a special case where we always have NEON but don't check
  * for crypto extensions.
  */
-#if !defined(ARMV8_OS_MACOS) && !defined(ARM_OS_IOS)
+#if !defined(ARMV8_OS_MACOS) && !defined(ARM_OS_IOS) && !defined(ARMV8_OS_SWITCH)
 /*
  * See http://bit.ly/2CcoEsr for run-time detection of ARM features and also
  * crbug.com/931275 for android_getCpuFeatures() use in the Android sandbox.
